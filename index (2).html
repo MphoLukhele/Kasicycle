@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>KasiCycle – turn waste into rands</title>
+<meta name="description" content="Weigh your scrap, see what it earns in rands, and email the buy-back centre to collect it.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>♻️</text></svg>">
+<style>
+:root{
+  --bg1:#e6f4dc;--bg2:#fff4d6;--card:#ffffffd9;--text:#1b2a1e;--muted:#58695b;
+  --green:#1f8a46;--green2:#6cc24a;--sun:#ffb703;--line:#cfe0c8;--btn-text:#fff;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg1:#0e1a12;--bg2:#1a2314;--card:#1a2a1fd9;--text:#eaf3ea;--muted:#a3b8a6;
+  --green:#4cc277;--green2:#8bd865;--sun:#ffc83d;--line:#2d4333;--btn-text:#0b1a10;color-scheme:dark}}
+:root[data-theme="dark"]{--bg1:#0e1a12;--bg2:#1a2314;--card:#1a2a1fd9;--text:#eaf3ea;--muted:#a3b8a6;--green:#4cc277;--green2:#8bd865;--sun:#ffc83d;--line:#2d4333;--btn-text:#0b1a10;color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100vh;color:var(--text);font-family:"Trebuchet MS",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.45;
+  background:linear-gradient(160deg,var(--bg1),var(--bg2)) fixed;overflow-x:hidden}
+.leaf{position:fixed;font-size:28px;opacity:.18;animation:float 14s linear infinite;pointer-events:none;top:-40px}
+.leaf:nth-child(1){left:8%;animation-delay:0s}.leaf:nth-child(2){left:30%;animation-delay:-4s;font-size:20px}
+.leaf:nth-child(3){left:55%;animation-delay:-8s}.leaf:nth-child(4){left:80%;animation-delay:-2s;font-size:22px}
+@keyframes float{to{transform:translateY(115vh) rotate(360deg)}}
+main{position:relative;max-width:560px;margin:0 auto;padding:16px 16px 40px}
+.hero{text-align:center;padding:18px 8px 6px}
+.brand{font-size:2.6rem;font-weight:800;letter-spacing:-1px;line-height:1;margin:2px 0 10px}
+.brand b{background:linear-gradient(90deg,var(--green),var(--sun));-webkit-background-clip:text;background-clip:text;color:transparent}
+.spin{display:inline-block;font-size:64px;animation:spin 10s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+h1{margin:4px 0;font-size:2rem;line-height:1.1;letter-spacing:-.5px}
+h1 span{background:linear-gradient(90deg,var(--green),var(--sun));-webkit-background-clip:text;background-clip:text;color:transparent}
+.tag{margin:6px auto 0;max-width:420px;color:var(--muted);font-size:1.02rem}
+.steps{display:flex;gap:8px;margin:18px 0;flex-wrap:wrap;justify-content:center}
+.steps div{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:.85rem}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:360px){.grid{grid-template-columns:1fr}}
+.item{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:14px 10px;text-align:center;
+  backdrop-filter:blur(6px);transition:transform .2s,box-shadow .2s}
+.item.on{transform:translateY(-3px);box-shadow:0 8px 22px #1f8a4633;border-color:var(--green)}
+.emoji{font-size:42px;display:block;transition:transform .25s}
+.item.on .emoji{transform:scale(1.15) rotate(-6deg)}
+.name{font-weight:700;margin-top:2px}
+.price{font-size:.8rem;color:var(--muted)}
+.stepper{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:10px}
+.stepper button{width:40px;height:40px;border-radius:50%;border:0;font-size:1.4rem;font-weight:700;cursor:pointer;
+  background:var(--green);color:var(--btn-text)}
+.stepper button:active{transform:scale(.9)}
+.stepper input{width:64px;height:40px;text-align:center;font-size:1.1rem;font-weight:700;border:2px solid var(--line);
+  border-radius:12px;background:transparent;color:var(--text)}
+.kglabel{font-size:.75rem;color:var(--muted);margin-top:4px}
+.panel{margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:24px;padding:18px;backdrop-filter:blur(6px)}
+.totals{text-align:center}
+.totals .small{color:var(--muted);font-size:.9rem}
+.money{font-size:3rem;font-weight:800;line-height:1.1;background:linear-gradient(90deg,var(--green),var(--sun));
+  -webkit-background-clip:text;background-clip:text;color:transparent;display:inline-block}
+.money.pop{animation:pop .35s}
+@keyframes pop{50%{transform:scale(1.15)}}
+.note{font-size:.8rem;color:var(--muted);margin-top:4px}
+label{display:block;font-size:.85rem;color:var(--muted);margin:12px 0 4px}
+.field{width:100%;font-size:1rem;padding:12px;border:2px solid var(--line);border-radius:14px;background:transparent;color:var(--text)}
+a.btn{display:block;text-align:center;text-decoration:none;font-weight:700;font-size:1.05rem;padding:15px;border-radius:16px;margin-top:12px;
+  background:linear-gradient(90deg,var(--green),var(--green2));color:var(--btn-text)}
+a.btn.alt{background:transparent;color:var(--green);border:2px solid var(--green)}
+a.btn:active{transform:scale(.98)}
+.tip{margin-top:16px;padding:12px 14px;border-radius:16px;background:var(--card);border:1px dashed var(--sun);font-size:.9rem}
+footer{text-align:center;color:var(--muted);font-size:.8rem;margin-top:22px}
+.pick{margin-bottom:18px}
+.pick label{margin-top:0}
+select.field{appearance:auto}
+button.btn{width:100%;font:inherit;font-weight:700;font-size:1.05rem;padding:15px;border-radius:16px;margin-top:12px;cursor:pointer;background:transparent;color:var(--green);border:2px solid var(--green)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="leaf">🍃</div><div class="leaf">♻️</div><div class="leaf">🍃</div><div class="leaf">🌱</div>
+<main>
+  <header class="hero">
+    <div class="spin">♻️</div>
+    <div class="brand">Kasi<b>Cycle</b></div>
+    <h1>Turn your <span>scrap into rands</span></h1>
+    <p class="tag">Weigh it, see what it could earn, and ask the buy-back centre to come and fetch it. Free for everyone.</p>
+  </header>
+
+  <div class="steps"><div>1️⃣ Add your kilos</div><div>2️⃣ See your money</div><div>3️⃣ Email the centre</div></div>
+
+  <section class="panel pick">
+    <label for="centre">Choose your buy-back centre</label>
+    <select class="field" id="centre"></select>
+    <button type="button" class="btn alt" id="near">📍 Find the closest to me</button>
+    <div class="note" id="nearmsg"></div>
+    <a class="btn alt" id="maplink" href="#" target="_blank" rel="noopener">🗺️ Show this centre on the map</a>
+  </section>
+
+  <section class="grid" id="grid" aria-label="Scrap items"></section>
+
+  <section class="panel">
+    <div class="totals">
+      <div class="small">You have <b id="kg">0</b> kg of scrap</div>
+      <div class="money" id="money">R 0.00</div>
+      <div class="note">This is an estimate. The buy-back centre’s final weighing and price count.</div>
+    </div>
+    <label for="name">Your name</label>
+    <input class="field" id="name" placeholder="e.g. Thandi" autocomplete="name">
+    <label for="area">Where must they collect? (street, area)</label>
+    <input class="field" id="area" placeholder="e.g. Section B, next to the spaza shop">
+    <a class="btn" id="send" href="#">✉️ Email the buy-back centre</a>
+    <a class="btn alt" id="share" href="#" target="_blank" rel="noopener">👥 Share my list with the community group</a>
+  </section>
+
+  <div class="tip">💡 <b>Tip:</b> Prices differ from centre to centre, so compare before you sell. Neighbours can also sell together on one day, as bigger loads often get a better price per kilo.</div>
+  <footer>KasiCycle · Made for the community · Recycle more, waste less 🌍</footer>
+</main>
+
+<script>
+/* ===========================================================
+   EDIT THIS PART ONCE A MONTH – nothing else needed.
+   items: the scrap types and a "generic" price per kg (rands),
+          used when a centre has no price of its own.
+   centres: one block per buy-back centre. For each centre set:
+     name, area, email (the centre’s email address),
+     lat / lng (get these from Google Maps: press and hold on
+     the centre, the numbers appear at the top),
+     prices: that centre's own price per kg, using the item keys.
+   The centres below came from an older City of Johannesburg
+   recycling list. Phone each one to confirm it still operates,
+   then add its email address and its real prices.
+   =========================================================== */
+var CONFIG = {
+  currency: "R",
+  items: [
+    { key: "copper",    name: "Copper wire",       emoji: "🔌", price: 100 },
+    { key: "aluminium", name: "Aluminium cans",    emoji: "🥫", price: 22 },
+    { key: "steel",     name: "Iron / steel",      emoji: "🔩", price: 2.5 },
+    { key: "plastic",   name: "Plastic bottles",   emoji: "🧴", price: 1.5 },
+    { key: "cardboard", name: "Cardboard / paper", emoji: "📦", price: 1.2 },
+    { key: "glass",     name: "Glass bottles",     emoji: "🍾", price: 0.5 }
+  ],
+  centres: [
+    { name: "Alexandra Buy-Back Centre (Pikitup)", area: "Marlboro, next to Alexandra", email: "",
+      lat: -26.0972222, lng: 28.092778, prices: {} },
+    { name: "Jabulani Scrap", area: "Wynberg", email: "",
+      lat: -26.099984, lng: 28.087124, prices: {} },
+    { name: "Remade Wynberg", area: "Main Pretoria Road, Wynberg", email: "",
+      lat: -26.111792, lng: 28.084989, prices: {} }
+  ]
+};
+/* ======================= end of editing ==================== */
+
+var $ = function (id) { return document.getElementById(id); };
+var grid = $("grid"), sel = $("centre"), cur = CONFIG.currency, cIdx = 0;
+
+CONFIG.centres.forEach(function (c, i) {
+  var o = document.createElement("option");
+  o.value = i; o.textContent = c.name + (c.area ? " – " + c.area : "");
+  sel.appendChild(o);
+});
+
+function priceFor(i) {
+  var c = CONFIG.centres[cIdx], it = CONFIG.items[i];
+  return (c && c.prices && typeof c.prices[it.key] === "number") ? c.prices[it.key] : it.price;
+}
+
+CONFIG.items.forEach(function (it, i) {
+  var d = document.createElement("div");
+  d.className = "item"; d.id = "item" + i;
+  d.innerHTML =
+    '<span class="emoji">' + it.emoji + '</span>' +
+    '<div class="name">' + it.name + '</div>' +
+    '<div class="price" id="pr' + i + '"></div>' +
+    '<div class="stepper">' +
+      '<button type="button" aria-label="less" data-i="' + i + '" data-d="-1">−</button>' +
+      '<input type="number" min="0" step="any" inputmode="decimal" id="k' + i + '" placeholder="0" aria-label="kg of ' + it.name + '">' +
+      '<button type="button" aria-label="more" data-i="' + i + '" data-d="1">+</button>' +
+    '</div><div class="kglabel">kg</div>';
+  grid.appendChild(d);
+});
+
+function fmt(n) {
+  return n.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function calc(pop) {
+  var c = CONFIG.centres[cIdx] || {};
+  var kg = 0, money = 0, lines = [];
+  CONFIG.items.forEach(function (it, i) {
+    var k = parseFloat($("k" + i).value) || 0, p = priceFor(i);
+    $("pr" + i).textContent = cur + p.toFixed(2) + " per kg";
+    $("item" + i).classList.toggle("on", k > 0);
+    if (k > 0) { kg += k; money += k * p; lines.push("- " + it.name + ": " + k + " kg"); }
+  });
+  kg = Math.round(kg * 100) / 100;
+  $("kg").textContent = kg;
+  $("money").textContent = cur + " " + fmt(money);
+  if (pop) { var m = $("money"); m.classList.remove("pop"); void m.offsetWidth; m.classList.add("pop"); }
+
+  var est = cur + " " + fmt(money);
+  var body = (lines.join("\n") || "(no items yet)") + "\nTotal: " + kg + " kg, estimated " + est +
+    "\nName: " + ($("name").value || "-") + "\nArea: " + ($("area").value || "-");
+  var toGroup = "My scrap list for this month’s pickup:\n" + body;
+  var mail = (c.email || "").trim();
+  var sendBtn = $("send");
+  if (mail) {
+    var msg = "Hello " + (c.name || "") + ",\n\nI have scrap to sell:\n" + body +
+      "\n\nCan you collect it? Please tell me your price per kg and a pickup day.\n\nThank you";
+    sendBtn.href = "mailto:" + mail + "?subject=" + encodeURIComponent("Scrap pickup request") + "&body=" + encodeURIComponent(msg);
+    sendBtn.textContent = "✉️ Email " + (c.name || "the centre");
+    sendBtn.style.opacity = "";
+  } else {
+    sendBtn.removeAttribute("href");
+    sendBtn.textContent = "✉️ Email address not added yet";
+    sendBtn.style.opacity = ".55";
+  }
+  $("share").href = "https://wa.me/?text=" + encodeURIComponent(toGroup);
+  var q = (typeof c.lat === "number" && typeof c.lng === "number") ? c.lat + "," + c.lng : (c.name || "") + " " + (c.area || "");
+  $("maplink").href = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(q);
+}
+
+function km(a, b, c, d) {
+  var r = Math.PI / 180, x = (c - a) * r, y = (d - b) * r;
+  var h = Math.sin(x / 2) * Math.sin(x / 2) + Math.cos(a * r) * Math.cos(c * r) * Math.sin(y / 2) * Math.sin(y / 2);
+  return 6371 * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
+}
+
+$("near").addEventListener("click", function () {
+  var msg = $("nearmsg");
+  if (!navigator.geolocation) { msg.textContent = "Your phone can’t share its location here. Please choose from the list."; return; }
+  msg.textContent = "Finding the closest centre…";
+  navigator.geolocation.getCurrentPosition(function (pos) {
+    var best = -1, bestD = 1e9;
+    CONFIG.centres.forEach(function (c, i) {
+      if (typeof c.lat !== "number") return;
+      var d = km(pos.coords.latitude, pos.coords.longitude, c.lat, c.lng);
+      if (d < bestD) { bestD = d; best = i; }
+    });
+    if (best < 0) { msg.textContent = "No centre locations are set yet. Please choose from the list."; return; }
+    sel.value = best; cIdx = best; calc(true);
+    msg.textContent = "Closest to you: " + CONFIG.centres[best].name + " (about " + (Math.round(bestD * 10) / 10) + " km away).";
+  }, function () {
+    msg.textContent = "We couldn’t get your location. Please choose your centre from the list.";
+  }, { timeout: 10000 });
+});
+
+sel.addEventListener("change", function () { cIdx = parseInt(sel.value, 10) || 0; $("nearmsg").textContent = ""; calc(true); });
+grid.addEventListener("click", function (e) {
+  var b = e.target.closest("button"); if (!b) return;
+  var inp = $("k" + b.dataset.i);
+  var v = Math.max(0, (parseFloat(inp.value) || 0) + parseInt(b.dataset.d, 10));
+  inp.value = v > 0 ? v : "";
+  calc(true);
+});
+document.addEventListener("input", function () { calc(false); });
+calc(false);
+</script>
+</body>
+</html>
